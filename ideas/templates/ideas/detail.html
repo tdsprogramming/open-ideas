@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block base_content %}
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col-md-8 border-right">
+                <h4>{{idea.title}}</h4>
+                <p>{{idea.description|safe}}</p>
+                <a class = "btn" href="#" id = "add-comment" onclick="showCommentForm()">Add Comment</a>
+                <a class = "btn" href="{% url 'ideas:claim' slug=idea.slug %}">Claim</a>
+                <div id="post-comment">
+                </div>
+                <br>
+                {% include 'comments/snippets/comment_list.html' %}
+            </div>
+            <div class="col-md-4">
+                <div class="position-fixed">
+                    <h1 class="display-4 mt-0">Projects</h1>
+                    <ul class = "collection">
+                        {% for p in projects %}
+                        <li class = "collection-item">
+                            <a href="{% url 'projects:detail' slug=p.slug %}">{{p.name}}</a> | Creator:
+                            <a href="{% url 'accounts:profile' slug=p.creator.slug %}">
+                                {{p.creator}}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock base_content %}
+{% block javascript %}
+
+    <script type="text/javascript">
+        function showCommentForm(e){
+            $("#post-comment").html(`{% include 'comments/snippets/comment_form.html' %}`);
+            $("#add-comment").css('display', 'none');
+            $("#cancel-comment").css('display', 'inline-block');
+        }
+
+        function cancelComment(e){
+            $("#add-comment").css('display', 'inline-block');
+            $("#cancel-comment").css('display', 'none');
+            $("#post-comment").html("");
+        }
+        function ajaxVote(url, slug, voteType){
+            $.ajax({
+                url: url,
+                method: "POST",
+                data: {
+                    csrfmiddlewaretoken: "{{csrf_token}}"
+                }
+            })
+            .done(function(response){
+                $("#votes_"+slug).html(String(response.votes));
+            });
+        }
+
+    </script>
+{% endblock javascript %}

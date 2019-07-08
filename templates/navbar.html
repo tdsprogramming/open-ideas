@@ -1,0 +1,27 @@
+<div class="navbar-fixed">
+    <nav class = "grey darken-2">
+        <div class="nav-wrapper px-5">
+            <a href="{% url 'static_pages:home' %}" class="brand-logo ml-5">OpenIdeas</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="{% url 'ideas:list' %}">Ideas</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'accounts:profile' user.username %}">Profile</a></li>
+                    <li><a class = "btn waves-effect blue darken-4" href="{% url 'ideas:create' %}">New Idea</a></li>
+                    <li><a class = "btn waves-effect red lighten-2" href="{% url 'accounts:logout' %}">Log out</a></li>
+                {% else %}
+                    <li><a class = "btn waves-effect" href="{% url 'accounts:login' %}">Log In</a></li>
+                    <li><a class="btn waves-effect deep-purple darken-2" href="{% url 'accounts:create' %}">Sign Up</a></li>
+                {% endif %}
+                <li>
+                    <form action="{% url 'search:search' %}" method = "GET">
+                        <div class="input-field col s6 s12">
+                            <input id="search" type="search" style="height:64px;" name="q" required>
+                            <label class="label-icon" for="search"><i class="material-icons">search</i></label>
+                            <i class="material-icons">close</i>
+                        </div>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>

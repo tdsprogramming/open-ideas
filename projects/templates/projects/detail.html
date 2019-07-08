@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block base_content %}
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-12">
+            <h1 id = "project-name" class="display-4 mr-3" style="display:inline-block">{{project.name}}</h1>
+            {% if request.user == project.creator %}
+                <a id = "edit-name-btn" class="waves-effect btn-floating">
+                    <i class="material-icons">edit</i>
+                </a>
+            {% endif %}
+            <form id = "edit-name-form" method="post" style="display:none;">
+                <input id="new-name" type="text" name="new_name" value="{{project.name}}">
+                <input class = "btn" type="submit">
+                <a id = "cancel-edit-name" class = "waves-effect btn red white-text">Cancel</a>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <p><b>Idea </b><a href="{% url 'ideas:detail' slug=project.idea.slug %}">{{project.idea}}</a></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <h1 class="display-4">Repository Information</h1>
+            {% if project.repo_url %}
+                <p class="valign-wrapper"><i class = "material-icons text-center" style="min-width:3rem;">insert_link</i> {{project.repo_url}}</p>
+                <p class="valign-wrapper"><i class = "material-icons text-center" style="min-width:3rem;">access_time</i>Last Updated: {{github_stats.updated_at|naturaltime}}</p>
+                <p class="valign-wrapper"><i class="fa fa-code-fork text-center" style="min-width:3rem;"></i> Forks: {{github_stats.forks}}</p>
+                <p class="valign-wrapper"><i class = "material-icons text-center" style="min-width:3rem;">star_border</i> Stars: {{github_stats.stars}}</p>
+                <p class="valign-wrapper"><i class = "material-icons text-center" style="min-width:3rem;">remove_red_eye</i>Watching: {{github_stats.watchers}}</p>
+                <p class="valign-wrapper"><i class = "material-icons text-center" style="min-width:3rem;">people_outline</i>Collaborators: {{github_stats.collaborators}} </p>
+                <hr>
+                <h5>Languages</h5>
+                <br>
+                {% for k,v in github_stats.languages.items %}
+                    <p class = "deep-purple-text text-darken-4">{{k}}</p>
+                    <div class="progress">
+                        <div class="determinate" style="width: {{v}}"></div>
+                    </div>
+                    <p class = "float-right">{{v}}</p>
+                    <br>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-warning">
+                    You do not have a repository link set up. You should add it here.
+                </div>
+                <form class="" action="index.html" method="post">
+                    <input type="text" name="" value="" placeholder="Repository Link">
+                    <input class = "btn" type="submit" name="Update">
+                </form>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h1 class = "display-4">Collaborators</h1>
+            <br>
+            {% if project.creator == request.user %}
+            <div class="alert alert-success">You are the main creator of this project</div>
+            {% endif %}
+            {% if project.collaborators.count == 0 %}
+                <div class = "alert alert-warning">This project does not have any collaborators yet</div>
+                <br>
+                {% if request.user.is_authenticated %}
+                    {% if request.user != project.creator or request.user not in project.collaborators %}
+                        <a class = "waves-effect btn" href="{% url 'projects:add_collaborator' slug=project.slug %}">Start Collaborating</a>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                {% for c in project.collaborators.all %}
+                    <p><a href="{% url 'accounts:profile' slug=c.slug %}">{{c}}</a></p>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock base_content %}
+{% block javascript %}
+<script type="text/javascript">
+    $("#edit-name-btn").click(function(){
+        $("#edit-name-form").css("display", "inline-block");
+        $("#edit-name-btn").css("display", "none");
+        $("#project-name").css("display", "none");
+    });
+    $("#cancel-edit-name").click(function(){
+        $("#edit-name-form").css("display", "none");
+        $("#edit-name-btn").css("display", "inline-block");
+        $("#project-name").css("display", "inline-block");
+    });
+    $("#edit-name-form").submit(function(e){
+        e.preventDefault();
+        $.ajax({
+            url: "{% url 'projects:update' slug=project.slug %}",
+            method: "POST",
+            data: {
+                csrfmiddlewaretoken: "{{csrf_token}}",
+                new_name: $("#new-name").val()
+            }
+        })
+        .done(function(response){
+            $("#project-name").html(response.name);
+            $("#cancel-edit-name").trigger('click');
+        });
+    });
+</script>
+{% endblock javascript %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block base_content %}
+<div class="container">
+    <div class="row">
+        <h1 class = "display-1">All Ideas</h1>
+    </div>
+    <div class="row order-filter">
+        <div class="col-sm-6 col-md-4">
+                <form class="" action="{% url 'ideas:list' %}" method="GET">
+                    <div class="input-field">
+                        <select id="order-filter-select" onchange="this.form.submit()" name="filter_by">
+                            <option value="" disabled selected>Choose your option</option>
+                            <option value="pop_desc">Most Popular</option>
+                            <option value="pop_asc">Least Popular</option>
+                            <option value="new_desc">Newest Ideas</option>
+                            <option value="new_asc">Oldest Ideas</option>
+                            <option value="no_creators">No Creators</option>
+                            <option value="no_creators">Most Creators</option>
+                        </select>
+                        <label>Filter By</label>
+                    </div>
+                </form>
+        </div>
+    </div>
+    <div id="ideas-list">
+        {% include 'ideas/snippets/list_ideas.html' %}
+    </div>
+</div>
+{% if is_paginated %}
+<div class="row text-center">
+    <ul class = "pagination">
+        {% if page_obj.has_previous %}
+            <li class="waves-effect"><a href="{{request.path}}?page={{page_obj.previous_page_number}}"><i class="material-icons">chevron_left</i></a></li>
+        {% endif %}
+        {% for i in page_obj.paginator.page_range %}
+            <li class="{% if i == page_obj.number %}active{% else %}waves-effect{% endif %}"><a href="{{request.path}}?page={{i}}">{{i}}</a></li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <li class="waves-effect"><a href="{{request.path}}?page={{page_obj.next_page_number}}"><i class="material-icons">chevron_right</i></a></li>
+        {% endif %}
+    </ul>
+</div>
+{% endif %}
+
+{% endblock base_content %}
+{% block javascript %}
+<script type="text/javascript">
+    function ajaxVote(url, slug, voteType){
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: {
+                csrfmiddlewaretoken: "{{csrf_token}}"
+            }
+        })
+        .done(function(response){
+            $("#votes_"+slug).html(String(response.votes));
+        });
+    }
+</script>
+{% endblock javascript %}

@@ -1,0 +1,30 @@
+<div class="container-fluid">
+    {% for c in comments %}
+        <div class="row">
+            <div class="col-12">
+                <ul class="collection">
+                    <li class="collection-item h-100">
+                        <div class="row h-100 inline-block align-middle">
+                            <div class="col-md-2 text-center">
+                                <a class="d-block deep-purple-text text-lighten-2 upvote-arrow" onClick = "ajaxVote('{% url 'comments:up_vote' id=c.id %}', '{{c.id}}', 'upvote');"><i class = "material-icons">arrow_upward</i></a>
+                                <span id = "votes_{{c.id}}">{{c.net_votes}}</span>
+                                <a class="d-block deep-purple-text text-lighten-2 upvote-arrow" onClick = "ajaxVote('{% url 'comments:down_vote' id=c.id %}', '{{c.id}}', 'downvote');"><i class = "material-icons">arrow_downward</i></a>
+                            </div>
+                            <div class="col-md-8">
+                                <p>{{c.content}}</p>
+                                <p>By: <a href="">{{c.author}}</a></p>
+                            </div>
+                            {% if request.user == c.author %}
+                                <div class="col-md-1">
+                                    <a class = "btn-floating red" href="{% url 'comments:delete' id=c.id %}">
+                                        <i class = "material-icons">delete</i>
+                                    </a>
+                                </div>
+                            {% endif%}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    {% endfor %}
+</div>

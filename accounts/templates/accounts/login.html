@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block base_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6 col-md-8">
+            <h1 class="display-4">Login</h1>
+            <form method="POST">
+                {% csrf_token %}
+                {{form}}
+                <input class="waves-effect btn" type="submit" value="Login">
+                <a class = "waves-effect btn deep-purple darken-2" href="{% url 'accounts:create' %}">Create an Account</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock base_content %}

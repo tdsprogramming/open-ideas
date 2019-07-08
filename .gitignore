@@ -1,0 +1,6 @@
+*.pyc
+__pycache__/
+migrations/
+dev.py
+
+db.sqlite3

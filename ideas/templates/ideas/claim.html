@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block base_content %}
+<div class="container p-5">
+    {% if already_has_project %}
+    <div class="alert alert-primary">
+        You are already working on a project for this idea. View it <a href="{% url 'projects:detail' slug=project.slug %}">here</a>.
+    </div>
+    {% else %}
+        {% if projects %}
+        <p>
+            This has already been claimed by another.
+            Are you sure you want to claim?
+            Any number of people can claim an idea, but you may want to help contribute on one of these:
+            <ul>
+                {% for p in projects %}
+                <li><a href="{% url 'projects:detail' slug=p.slug %}">{{p.creator}}</a></li>
+                {% endfor %}
+            </ul>
+        </p>
+        {% else %}
+        <p>
+            This idea has not been claimed yet! Are you sure you would like to be the first to claim?
+        </p>
+        {% endif %}
+        <form class = "d-inline" action="{% url 'ideas:claim' slug=idea.slug %}" method="POST">
+            {% csrf_token %}
+            <div class="col-sm-6 col-md-4">
+                <input type="text" name="name" placeholder="Project Name" required>
+                <input type="submit" value="Yes" class="btn btn-md btn-success">
+                <a class="btn btn-md btn-danger" href="{{request.META.HTTP_REFERER}}">No</a>
+            </div>
+        </form>
+    {% endif %}
+</div>
+{% endblock base_content %}

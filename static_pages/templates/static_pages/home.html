@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block base_content %}
+
+    <div class="parallax-container">
+        <div class="parallax">
+            <img class="position-absolute z-depth-1" src="{% static 'images/jumbotron.jpg'%}">
+        </div>
+        <h1>
+            OpenIdeas
+        </h1>
+    </div>
+    <div class="section white">
+        <div class="row container">
+            <h2 class="header">OpenIdeas</h2>
+            <p class="grey-text text-darken-3 lighten-3">
+                OpenIdeas is a platform that allows people from non technical backgrounds to come up with ideas for those with a techincal background. For those that think of an idea, but do not have the knowledge to create the idea, you now have an opportunity for somebody to bring that idea to realization.
+            </p>
+        </div>
+    </div>
+
+
+{% endblock base_content %}

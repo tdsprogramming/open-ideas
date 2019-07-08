@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block base_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class = "display-4">Results</h1>
+            {% for r in results %}
+                <div class="">
+                    <h1 class="display-4"><a href="{{r.get_absolute_url}}">{{r.title}}</a></h1>
+                    <p>{{r.description}}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock base_content %}

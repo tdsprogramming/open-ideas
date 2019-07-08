@@ -1,0 +1,17 @@
+{% for i in ideas %}
+    <div class="row">
+        <div class="col s12">
+            <h4 class = "display-4"><a class="waves-effect cyan-text" href="{% url 'ideas:detail' slug=i.slug %}">{{i.title}}</a></h4>
+            <div class="d-inline-block text-center mr-5">
+                <a class="d-block deep-purple-text text-lighten-2 upvote-arrow" onClick = "ajaxVote('{% url 'ideas:up_vote' slug=i.slug %}', '{{i.slug}}', 'upvote');"><i class = "material-icons">arrow_upward</i></a>
+                <span id = "votes_{{i.slug}}">{{i.net_votes}}</span>
+                <a class="d-block deep-purple-text text-lighten-2 upvote-arrow" onClick = "ajaxVote('{% url 'ideas:down_vote' slug=i.slug %}', '{{i.slug}}', 'downvote');"><i class = "material-icons">arrow_downward</i></a>
+            </div>
+            <div class="d-inline-block w-70">
+                <p>{{i.description|safe}}</p>
+                <p>Originator: <a href="">{{i.originator}}</a></p>
+            </div>
+        </div>
+    </div>
+    <hr>
+{% endfor %}

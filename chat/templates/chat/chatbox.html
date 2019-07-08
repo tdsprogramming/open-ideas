@@ -1,0 +1,160 @@
+<div id = "chat">
+    <div id="chatbox-btn" class="waves-effect teal darken-2 white-text">
+        Chatbox
+    </div>
+    <div id="chatbox" class="white">
+        <div class="top">
+            <i id="chatbox-close" class="material-icons deep-purple-text darken-3">close</i>
+            <span>Chatbox</span>
+        </div>
+        <div class="body">
+            <div class="left">
+                <h4 class="m-0 mb-3">Users</h4>
+                <div class="list-users">
+                    {% for u in request.session.chat_users %}
+                        {% if u.username %}
+                            {% if u.username != request.user.username%}
+                                <p onclick="enterChatroom(this, '{{u.username}}');">{{u.username}}</p>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="right">
+                <p>Chat with Username</p>
+                <div id="chat-log" name="name"></div>
+                <textarea id = "chat-message-input" class="w-75 materialize-textarea" id="chat-message-input"></textarea>
+                <button id="chat-message-submit" type="submit" class="waves-effect teal btn-floating"><i class = "material-icons">send</i></button>
+            </div>
+        </div>
+    </div>
+</div>
+{% comment %}
+    Roomnames will be named as 'username1/username2' in order of email alphabetical order
+{% endcomment %}
+<script>
+    let chatSocket;
+
+    function enterChatroom(element, slug){
+        var currentUserUsername="{{user.username}}";
+        var otherUserUsername = slug;
+        $.ajax({
+            url: '{% url "chat:get_chatroom" %}',
+            method: "GET",
+            data:{
+                current_user_username: currentUserUsername,
+                other_user_username: otherUserUsername,
+            }
+        })
+        .done(function(response){
+            var room_name=response.room_name;
+            console.log(room_name);
+            formatChat(element);
+            chat(room_name);
+        });
+    }
+    function chat(roomName){
+        console.log(roomName);
+        // if a websocket is already open
+        if(typeof chatSocket !== 'undefined'){
+            // if it is a new chatroom, close chatSocket and create new
+            if(!chatSocket.url.includes(roomName)){
+                chatSocket.close();
+                clearChatlog();
+                chatSocket = new WebSocket(
+                    'ws://' + window.location.host +
+                    '/ws/chat/' + roomName + '/'
+                );
+                // chatSocket.onopen = function(e){
+                //     console.log("hello");
+                // }
+            }
+        }
+
+        else{
+            chatSocket = new WebSocket(
+                'ws://' + window.location.host +
+                '/ws/chat/' + roomName + '/'
+            );
+
+        }
+        //when chatSocket opens
+        chatSocket.onopen = function(e){
+            fetchMessages();
+        }
+
+        //when chatSocket sends message
+        chatSocket.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+            if(data['command'] == 'messages'){
+                displayMessages(data.messages);
+            }
+            else{
+                var message = data['message'];
+                displayMessages(message.messages);
+            }
+        };
+
+        //when chatSocket closes
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            var messageInputDom = document.querySelector('#chat-message-input');
+            var message = messageInputDom.value;
+            chatSocket.send(
+                JSON.stringify({
+                    'command': 'create',
+                    'message': message,
+                    'sender': '{{request.user.username}}',
+                    'chatroom': roomName
+                })
+            );
+
+            messageInputDom.value = '';
+        };
+
+        //helper methods
+        function fetchMessages(){
+            chatSocket.send(
+                JSON.stringify({
+                    'command': 'fetch',
+                    'chatroom': roomName
+                })
+            );
+        }
+        function displayMessages(messages){
+            let messageHTML = "";
+            for(let i = 0; i < messages.length; i++){
+                let time = new Date(messages[i]['created']);
+                time = time.toTimeString().slice(0,8);
+                if(messages[i]['sender']['username'] === '{{user.username}}'){
+                    messageHTML += "<div class='align-right'><p class = 'message sent'>"+messages[i]['content']+"<span class='time'>"+time+"</span>"+"</p></div>";
+                }
+                else{
+                    messageHTML += "<div class = 'align-left'><p class = 'message reply'>"+messages[i]['content']+"<span class='time'>"+time+"</span>"+"</p></div>"
+                }
+            }
+            $('#chat-log').append(messageHTML);
+            scrollToBottom();
+        }
+        function clearChatlog(){
+            $('#chat-log').empty();
+        }
+        function scrollToBottom(){
+            document.querySelector("#chat-log").scrollTo(0,document.querySelector("#chat-log").scrollHeight);
+        }
+    }
+    function formatChat(element, slug){
+        $('.active').removeClass('active');
+        $(element).addClass('active');
+    }
+</script>

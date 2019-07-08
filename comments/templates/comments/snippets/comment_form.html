@@ -1,0 +1,7 @@
+{% load crispy_forms_tags %}
+<form method="POST" action="{% url 'comments:create' idea_slug=idea.slug comment_id=None %}">
+    {% csrf_token %}
+    {{comment_form | crispy}}
+    <button class = "btn teal" type="submit">Add Comment</button>
+    <a class = "btn red darken-3" id = "cancel-comment" href="#" style="display:none;" onclick="cancelComment()">Cancel</a>
+</form>
